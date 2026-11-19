@@ -9,6 +9,8 @@ export interface BoomConfig {
   triggers: { diagnostics: boolean; tasks: boolean; terminal: boolean };
   diagnostics: {
     minSeverity: vscode.DiagnosticSeverity;
+    when: "save" | "typing";
+    onAutoSave: boolean;
     debounceMs: number;
     ignoreSources: string[];
   };
@@ -34,6 +36,8 @@ export function readConfig(): BoomConfig {
         c.get<string>("diagnostics.minSeverity", "error") === "warning"
           ? vscode.DiagnosticSeverity.Warning
           : vscode.DiagnosticSeverity.Error,
+      when: c.get("diagnostics.when", "save"),
+      onAutoSave: c.get("diagnostics.onAutoSave", true),
       debounceMs: c.get("diagnostics.debounceMs", 1500),
       ignoreSources: c.get("diagnostics.ignoreSources", []),
     },
@@ -46,6 +50,6 @@ export function readConfig(): BoomConfig {
       terminal: c.get("sounds.terminal", ""),
     },
     showMessage: c.get("showMessage", true),
-    reveal: c.get("reveal", "panel"),
+    reveal: c.get("reveal", "source"),
   };
 }

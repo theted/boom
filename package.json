@@ -2,7 +2,7 @@
   "name": "boom",
   "displayName": "Boom",
   "description": "Plays a vine-boom and shows the error whenever something goes wrong.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "local",
   "private": true,
   "license": "UNLICENSED",
@@ -71,11 +71,29 @@
           "default": "error",
           "description": "Lowest diagnostic severity that triggers a boom."
         },
+        "boom.diagnostics.when": {
+          "type": "string",
+          "enum": [
+            "save",
+            "typing"
+          ],
+          "enumDescriptions": [
+            "Check for new problems after a file is saved (see boom.diagnostics.onAutoSave).",
+            "Check while you type, once problems stop changing for debounceMs."
+          ],
+          "default": "save",
+          "description": "When new problems are checked for."
+        },
+        "boom.diagnostics.onAutoSave": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "With `#boom.diagnostics.when#` set to `save`: also boom after auto-saves (`files.autoSave`). Turn off to only boom when you save yourself (Ctrl/Cmd+S)."
+        },
         "boom.diagnostics.debounceMs": {
           "type": "number",
           "default": 1500,
           "minimum": 0,
-          "description": "Wait this long after diagnostics stop changing before booming, so half-typed code doesn't trigger it."
+          "description": "Wait this long after problems stop changing before checking, so language servers and watch tasks can catch up."
         },
         "boom.diagnostics.ignoreSources": {
           "type": "array",
@@ -137,10 +155,10 @@
           ],
           "enumDescriptions": [
             "Only play the sound (and the notification, if enabled).",
-            "Focus the Problems panel (diagnostics) or the terminal (tasks/commands).",
-            "Jump to the offending line (diagnostics); otherwise same as panel."
+            "Focus the Problems panel (problems) or the terminal (tasks/commands).",
+            "Open the file at the error line and show the message in a hover. For terminal commands the line is found in the output (file:line, tsc, Python tracebacks); falls back to panel."
           ],
-          "default": "panel",
+          "default": "source",
           "description": "What to bring into focus when booming."
         }
       }

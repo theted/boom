@@ -9,9 +9,14 @@ Not published to the Marketplace. You install it from a local `.vsix`.
 
 | Trigger | When | Setting |
 | --- | --- | --- |
-| Diagnostics | A **new** error shows up in the Problems panel (after it stops changing for `debounceMs`) | `boom.triggers.diagnostics` |
+| Diagnostics | A **new** error shows up in the Problems panel after you save (auto-saves count too, unless you turn that off) | `boom.triggers.diagnostics` |
 | Tasks | A task (Terminal → Run Task, npm scripts, …) exits non-zero | `boom.triggers.tasks` |
 | Terminal | A command you type in the integrated terminal exits non-zero (not Ctrl+C) | `boom.triggers.terminal` |
+
+By default it then **jumps to the error**: opens the file at the line and shows the
+message in a hover. For terminal commands the line is taken from the output
+(`file:line:col`, tsc's `file(line,col)`, Node stack traces, Python tracebacks),
+preferring your code over `node_modules`. If no line can be found it shows the terminal.
 
 ## Install (Linux and macOS)
 
@@ -79,7 +84,9 @@ To convert: `ffmpeg -i vine-boom.mp3 vine-boom.wav`.
 | `boom.enabled` | `true` | Master switch; also toggled from the 💥 in the status bar |
 | `boom.triggers.diagnostics` / `.tasks` / `.terminal` | `true` | Turn each trigger on/off |
 | `boom.diagnostics.minSeverity` | `"error"` | `"warning"` to boom on warnings too |
-| `boom.diagnostics.debounceMs` | `1500` | Wait for diagnostics to settle, so half-typed code doesn't boom |
+| `boom.diagnostics.when` | `"save"` | `"save"`: check after saving; `"typing"`: check whenever problems settle |
+| `boom.diagnostics.onAutoSave` | `true` | With `when: "save"`, also boom after auto-saves. `false` = only when you press Ctrl/Cmd+S |
+| `boom.diagnostics.debounceMs` | `1500` | Wait for problems to settle before checking (language servers and watch tasks lag a bit) |
 | `boom.diagnostics.ignoreSources` | `[]` | e.g. `["cSpell", "markdownlint"]` |
 | `boom.cooldownMs` | `3000` | Minimum time between booms |
 | `boom.volume` | `1` | 0–1 (`aplay` ignores it) |
@@ -87,7 +94,7 @@ To convert: `ffmpeg -i vine-boom.mp3 vine-boom.wav`.
 | `boom.sounds.diagnostics` / `.tasks` / `.terminal` | `""` | Per-trigger sound; empty uses `boom.sound` |
 | `boom.soundsDir` | `""` | Your sounds folder; empty = `~/.config/boom/sounds` |
 | `boom.showMessage` | `true` | Show the error as a notification (with a "Go to error" button) |
-| `boom.reveal` | `"panel"` | `"none"`, `"panel"` (Problems panel or terminal), or `"source"` (jump to the line) |
+| `boom.reveal` | `"source"` | `"source"` (jump to the line + hover), `"panel"` (Problems panel or terminal), or `"none"` |
 
 ## Developing
 
@@ -103,6 +110,7 @@ package.json              the manifest: commands, settings, when to activate
 src/extension.ts          activate(): wires everything up, status bar, commands
 src/boom.ts               Boomer: cooldown, play sound, notify, reveal
 src/player.ts             cross-platform "play this file" via afplay/pw-play/…
+src/locate.ts             finds file:line in terminal output
 src/sounds.ts             finds sounds: bundled media/*.wav + your sounds folder
 src/picker.ts             "Pick a sound…": two-step QuickPick with live previews
 src/config.ts             typed reader for the boom.* settings
