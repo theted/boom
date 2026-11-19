@@ -13,6 +13,7 @@ export function registerTerminalTrigger(boomer: Boomer): vscode.Disposable {
     // If a failing task also reports here, the cooldown in Boomer swallows the
     // duplicate, so no special-casing is needed.
     boomer.fire({
+      trigger: "terminal",
       title: `Command failed (exit ${e.exitCode})`,
       detail: e.execution.commandLine.value,
       terminal: e.terminal,

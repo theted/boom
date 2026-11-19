@@ -21,6 +21,7 @@ export function registerDiagnosticsTrigger(boomer: Boomer): vscode.Disposable {
           const [, first] = fresh[0];
           const more = fresh.length > 1 ? ` (+${fresh.length - 1} more)` : "";
           boomer.fire({
+            trigger: "diagnostics",
             title: `${vscode.workspace.asRelativePath(first.uri)}:${first.diag.range.start.line + 1}${more}`,
             detail: first.diag.message,
             location: new vscode.Location(first.uri, first.diag.range),

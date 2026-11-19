@@ -2,6 +2,8 @@ import * as vscode from "vscode";
 
 // Every setting declared under "contributes.configuration" in package.json,
 // read in one place so the rest of the code gets plain typed values.
+export type Trigger = "diagnostics" | "tasks" | "terminal";
+
 export interface BoomConfig {
   enabled: boolean;
   triggers: { diagnostics: boolean; tasks: boolean; terminal: boolean };
@@ -12,7 +14,8 @@ export interface BoomConfig {
   };
   cooldownMs: number;
   volume: number;
-  soundFile: string;
+  sound: string;
+  sounds: Record<Trigger, string>; // per-trigger override, "" = use `sound`
   showMessage: boolean;
   reveal: "none" | "panel" | "source";
 }
@@ -36,7 +39,12 @@ export function readConfig(): BoomConfig {
     },
     cooldownMs: c.get("cooldownMs", 3000),
     volume: Math.min(1, Math.max(0, c.get("volume", 1))),
-    soundFile: c.get("soundFile", ""),
+    sound: c.get("sound", "boom"),
+    sounds: {
+      diagnostics: c.get("sounds.diagnostics", ""),
+      tasks: c.get("sounds.tasks", ""),
+      terminal: c.get("sounds.terminal", ""),
+    },
     showMessage: c.get("showMessage", true),
     reveal: c.get("reveal", "panel"),
   };

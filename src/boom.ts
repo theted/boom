@@ -1,9 +1,11 @@
 import * as vscode from "vscode";
-import { readConfig } from "./config";
+import { readConfig, type Trigger } from "./config";
 import { play } from "./player";
+import { resolveSound } from "./sounds";
 
 // What a trigger hands over when something went wrong.
 export interface BoomEvent {
+  trigger?: Trigger; // picks the per-trigger sound; absent = the default sound
   title: string; // short, e.g. "Task failed: build"
   detail?: string; // the actual error text
   // How to "show the error": the panel to focus, or a precise location.
@@ -34,8 +36,13 @@ export class Boomer {
     this.lastBoom = Date.now();
     this.log.info(`BOOM: ${event.title}${event.detail ? ` — ${event.detail}` : ""}`);
 
-    const file = cfg.soundFile || vscode.Uri.joinPath(this.extensionUri, "media", "boom.wav").fsPath;
-    play(file, cfg.volume, (msg) => this.log.warn(msg));
+    const wanted = (event.trigger && cfg.sounds[event.trigger]) || cfg.sound;
+    let file = resolveSound(this.extensionUri, wanted);
+    if (!file) {
+      this.log.warn(`Sound "${wanted}" not found, falling back to "boom".`);
+      file = resolveSound(this.extensionUri, "boom");
+    }
+    if (file) play(file, cfg.volume, (msg) => this.log.warn(msg));
 
     if (cfg.reveal !== "none") this.reveal(event, cfg.reveal);
     if (cfg.showMessage) this.notify(event);

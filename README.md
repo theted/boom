@@ -22,7 +22,7 @@ Requires Node.js 20+ and the `code` command on your PATH
 git clone git@github.com:theted/boom.git
 cd boom
 npm install
-npm run install-ext   # compiles, packages boom-0.0.1.vsix, installs it
+npm run install-ext   # compiles, packages boom.vsix, installs it
 ```
 
 Then reload VS Code (**Developer: Reload Window**) and run **Boom: Play a test boom**
@@ -41,17 +41,36 @@ The extension host is plain Node.js with no audio API, so Boom calls a command-l
 
 If nothing plays, open **Output → Boom** to see what went wrong.
 
-### Using the real vine boom
+## Sounds
 
-The bundled `media/boom.wav` is synthesised by `scripts/make-boom.mjs` (a deep,
-dropping bass hit). To use the original, download it yourself and point the setting at it:
+Run **Boom: Pick a sound…** from the Command Palette. Each sound plays as you arrow
+over it; after picking, choose whether it's for everything or for one trigger only
+(e.g. `pipe` for failed tasks, `boom` for new problems).
 
-```jsonc
-// settings.json
-"boom.soundFile": "/home/you/sounds/vine-boom.wav"
+Built in (made by `scripts/make-sounds.mjs`, regenerate with `npm run sounds`):
+
+| Name | Sound |
+| --- | --- |
+| `boom` | deep, dropping bass hit with reverb |
+| `pipe` | metal pipe clanging on concrete, with a bounce |
+| `bonk` | short hollow knock |
+
+### Adding your own (the real vine boom, metal pipe, …)
+
+The meme originals aren't bundled. Download them yourself and drop them into your
+sounds folder, **`~/.config/boom/sounds/`** (same path on Linux and macOS; run
+**Boom: Open your sounds folder** to create and open it). They show up in the picker
+under *Your sounds*, by file name:
+
+```
+~/.config/boom/sounds/
+├── vine-boom.wav      → "boom.sound": "vine-boom"
+└── metal-pipe.wav     → "boom.sounds.tasks": "metal-pipe"
 ```
 
+A file with the same name as a built-in sound (e.g. `boom.wav`) replaces it.
 Prefer `.wav`: `afplay` and `ffplay` also play `.mp3`, but `paplay` and `aplay` don't.
+To convert: `ffmpeg -i vine-boom.mp3 vine-boom.wav`.
 
 ## Settings
 
@@ -64,7 +83,9 @@ Prefer `.wav`: `afplay` and `ffplay` also play `.mp3`, but `paplay` and `aplay` 
 | `boom.diagnostics.ignoreSources` | `[]` | e.g. `["cSpell", "markdownlint"]` |
 | `boom.cooldownMs` | `3000` | Minimum time between booms |
 | `boom.volume` | `1` | 0–1 (`aplay` ignores it) |
-| `boom.soundFile` | `""` | Your own sound file; empty uses the bundled one |
+| `boom.sound` | `"boom"` | Sound name (built in or yours) or an absolute path |
+| `boom.sounds.diagnostics` / `.tasks` / `.terminal` | `""` | Per-trigger sound; empty uses `boom.sound` |
+| `boom.soundsDir` | `""` | Your sounds folder; empty = `~/.config/boom/sounds` |
 | `boom.showMessage` | `true` | Show the error as a notification (with a "Go to error" button) |
 | `boom.reveal` | `"panel"` | `"none"`, `"panel"` (Problems panel or terminal), or `"source"` (jump to the line) |
 
@@ -82,9 +103,11 @@ package.json              the manifest: commands, settings, when to activate
 src/extension.ts          activate(): wires everything up, status bar, commands
 src/boom.ts               Boomer: cooldown, play sound, notify, reveal
 src/player.ts             cross-platform "play this file" via afplay/pw-play/…
+src/sounds.ts             finds sounds: bundled media/*.wav + your sounds folder
+src/picker.ts             "Pick a sound…": two-step QuickPick with live previews
 src/config.ts             typed reader for the boom.* settings
 src/triggers/*.ts         one file per error source; each just calls boomer.fire()
-scripts/make-boom.mjs     generates media/boom.wav
+scripts/make-sounds.mjs   synthesises media/*.wav
 ```
 
 The key ideas, if you're learning:

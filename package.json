@@ -2,20 +2,42 @@
   "name": "boom",
   "displayName": "Boom",
   "description": "Plays a vine-boom and shows the error whenever something goes wrong.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "local",
   "private": true,
   "license": "UNLICENSED",
   "engines": {
     "vscode": "^1.93.0"
   },
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "main": "./out/extension.js",
-  "activationEvents": ["onStartupFinished"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
     "commands": [
-      { "command": "boom.test", "title": "Play a test boom", "category": "Boom" },
-      { "command": "boom.toggle", "title": "Toggle on/off", "category": "Boom" }
+      {
+        "command": "boom.test",
+        "title": "Play a test boom",
+        "category": "Boom"
+      },
+      {
+        "command": "boom.pickSound",
+        "title": "Pick a sound…",
+        "category": "Boom"
+      },
+      {
+        "command": "boom.toggle",
+        "title": "Toggle on/off",
+        "category": "Boom"
+      },
+      {
+        "command": "boom.openSoundsFolder",
+        "title": "Open your sounds folder",
+        "category": "Boom"
+      }
     ],
     "configuration": {
       "title": "Boom",
@@ -42,7 +64,10 @@
         },
         "boom.diagnostics.minSeverity": {
           "type": "string",
-          "enum": ["error", "warning"],
+          "enum": [
+            "error",
+            "warning"
+          ],
           "default": "error",
           "description": "Lowest diagnostic severity that triggers a boom."
         },
@@ -54,7 +79,9 @@
         },
         "boom.diagnostics.ignoreSources": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "markdownDescription": "Diagnostic sources to ignore, e.g. `[\"cSpell\", \"markdownlint\"]`. The source is shown in grey after each message in the Problems panel."
         },
@@ -71,10 +98,30 @@
           "maximum": 1,
           "description": "Playback volume, 0–1."
         },
-        "boom.soundFile": {
+        "boom.sound": {
+          "type": "string",
+          "default": "boom",
+          "markdownDescription": "The sound to play. A bundled sound (`boom`, `pipe`, `bonk`), the name of a file in your sounds folder (without extension, e.g. `vine-boom`), or an absolute path. Easiest: run **Boom: Pick a sound…**."
+        },
+        "boom.sounds.diagnostics": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Absolute path to your own sound (e.g. the real vine-boom). Use `.wav` for the widest player support. Empty = the bundled boom."
+          "markdownDescription": "Sound for new problems. Empty = use `#boom.sound#`."
+        },
+        "boom.sounds.tasks": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Sound for failed tasks. Empty = use `#boom.sound#`."
+        },
+        "boom.sounds.terminal": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Sound for failed terminal commands. Empty = use `#boom.sound#`."
+        },
+        "boom.soundsDir": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Folder with your own sounds (`.wav` works with every player). Empty = `~/.config/boom/sounds`."
         },
         "boom.showMessage": {
           "type": "boolean",
@@ -83,7 +130,11 @@
         },
         "boom.reveal": {
           "type": "string",
-          "enum": ["none", "panel", "source"],
+          "enum": [
+            "none",
+            "panel",
+            "source"
+          ],
           "enumDescriptions": [
             "Only play the sound (and the notification, if enabled).",
             "Focus the Problems panel (diagnostics) or the terminal (tasks/commands).",
@@ -98,9 +149,9 @@
   "scripts": {
     "compile": "tsc -p .",
     "watch": "tsc -watch -p .",
-    "sound": "node scripts/make-boom.mjs",
-    "package": "vsce package --allow-missing-repository --skip-license",
-    "install-ext": "npm run compile && npm run package && code --install-extension boom-0.0.1.vsix --force"
+    "sounds": "node scripts/make-sounds.mjs",
+    "package": "vsce package --allow-missing-repository --skip-license -o boom.vsix",
+    "install-ext": "npm run compile && npm run package && code --install-extension boom.vsix --force"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

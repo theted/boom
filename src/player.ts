@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 
 // The extension host is plain Node.js: there is no audio API, so we shell out
 // to whatever player the OS has. Each candidate is tried in order until one
@@ -17,6 +17,13 @@ const candidates: Record<string, Candidate[]> = {
 
 // Remember which player worked so later booms skip the probing.
 let working: Candidate | undefined;
+// The most recent player process, so a preview can cut off the previous one.
+let current: ChildProcess | undefined;
+
+export function stopPlaying(): void {
+  current?.kill();
+  current = undefined;
+}
 
 export function play(file: string, volume: number, log: (msg: string) => void): void {
   const list = working ? [working] : candidates[process.platform] ?? [];
@@ -37,9 +44,10 @@ function tryNext(list: Candidate[], i: number, file: string, volume: number, log
   child.on("error", () => tryNext(list, i + 1, file, volume, log)); // not installed
   child.on("spawn", () => {
     working = c;
+    current = child;
   });
-  child.on("exit", (code) => {
-    if (code !== 0) {
+  child.on("exit", (code, signal) => {
+    if (code !== 0 && signal === null) {
       log(`${c.cmd} exited with ${code} playing ${file}.`);
     }
   });

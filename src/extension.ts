@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Boomer } from "./boom";
+import { openSoundsFolder, pickSound } from "./picker";
 import { registerDiagnosticsTrigger } from "./triggers/diagnostics";
 import { registerTaskTrigger } from "./triggers/tasks";
 import { registerTerminalTrigger } from "./triggers/terminal";
@@ -27,6 +28,8 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("boom.test", () =>
       boomer.fire({ title: "Test boom", detail: "this is what an error will feel like" }, { force: true }),
     ),
+    vscode.commands.registerCommand("boom.pickSound", () => pickSound(context.extensionUri)),
+    vscode.commands.registerCommand("boom.openSoundsFolder", openSoundsFolder),
     vscode.commands.registerCommand("boom.toggle", async () => {
       const cfg = vscode.workspace.getConfiguration("boom");
       await cfg.update("enabled", !cfg.get("enabled", true), vscode.ConfigurationTarget.Global);

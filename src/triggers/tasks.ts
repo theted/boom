@@ -9,6 +9,7 @@ export function registerTaskTrigger(boomer: Boomer): vscode.Disposable {
     if (!cfg.triggers.tasks || e.exitCode === undefined || e.exitCode === 0) return;
     const name = e.execution.task.name;
     boomer.fire({
+      trigger: "tasks",
       title: `Task failed: ${name}`,
       detail: `exit code ${e.exitCode}`,
       // Task terminals are named after the task; good enough to find it.
