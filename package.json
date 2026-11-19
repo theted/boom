@@ -1,0 +1,111 @@
+{
+  "name": "boom",
+  "displayName": "Boom",
+  "description": "Plays a vine-boom and shows the error whenever something goes wrong.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": ["Other"],
+  "main": "./out/extension.js",
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "commands": [
+      { "command": "boom.test", "title": "Play a test boom", "category": "Boom" },
+      { "command": "boom.toggle", "title": "Toggle on/off", "category": "Boom" }
+    ],
+    "configuration": {
+      "title": "Boom",
+      "properties": {
+        "boom.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Master switch."
+        },
+        "boom.triggers.diagnostics": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Boom when a **new** problem (red squiggle) appears in the Problems panel."
+        },
+        "boom.triggers.tasks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Boom when a VS Code task (Terminal > Run Task) exits with a non-zero code."
+        },
+        "boom.triggers.terminal": {
+          "type": "boolean",
+          "default": true,
+          "description": "Boom when a command typed in the integrated terminal exits with a non-zero code (needs shell integration)."
+        },
+        "boom.diagnostics.minSeverity": {
+          "type": "string",
+          "enum": ["error", "warning"],
+          "default": "error",
+          "description": "Lowest diagnostic severity that triggers a boom."
+        },
+        "boom.diagnostics.debounceMs": {
+          "type": "number",
+          "default": 1500,
+          "minimum": 0,
+          "description": "Wait this long after diagnostics stop changing before booming, so half-typed code doesn't trigger it."
+        },
+        "boom.diagnostics.ignoreSources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "markdownDescription": "Diagnostic sources to ignore, e.g. `[\"cSpell\", \"markdownlint\"]`. The source is shown in grey after each message in the Problems panel."
+        },
+        "boom.cooldownMs": {
+          "type": "number",
+          "default": 3000,
+          "minimum": 0,
+          "description": "Minimum time between two booms."
+        },
+        "boom.volume": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Playback volume, 0–1."
+        },
+        "boom.soundFile": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute path to your own sound (e.g. the real vine-boom). Use `.wav` for the widest player support. Empty = the bundled boom."
+        },
+        "boom.showMessage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the error as a notification."
+        },
+        "boom.reveal": {
+          "type": "string",
+          "enum": ["none", "panel", "source"],
+          "enumDescriptions": [
+            "Only play the sound (and the notification, if enabled).",
+            "Focus the Problems panel (diagnostics) or the terminal (tasks/commands).",
+            "Jump to the offending line (diagnostics); otherwise same as panel."
+          ],
+          "default": "panel",
+          "description": "What to bring into focus when booming."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "sound": "node scripts/make-boom.mjs",
+    "package": "vsce package --allow-missing-repository --skip-license",
+    "install-ext": "npm run compile && npm run package && code --install-extension boom-0.0.1.vsix --force"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "~1.93.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.9.0"
+  }
+}
